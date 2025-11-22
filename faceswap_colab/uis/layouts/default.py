@@ -122,4 +122,20 @@ def listen() -> None:
 
 
 def run(ui : gradio.Blocks) -> None:
-	ui.launch(favicon_path = 'faceswap_colab.ico', inbrowser = state_manager.get_item('open_browser'))
+	# En Gradio 5.x, la API cambió - favicon_path ya no existe
+	# Usar solo inbrowser, y agregar share para Colab
+	try:
+		# Intentar con parámetros de Gradio 5.x
+		ui.launch(
+			inbrowser = state_manager.get_item('open_browser'),
+			share = True,  # Para Colab - obtener enlace público
+			server_name = '0.0.0.0',
+			server_port = 7860
+		)
+	except TypeError:
+		# Si falla, intentar sin parámetros nuevos
+		try:
+			ui.launch(inbrowser = state_manager.get_item('open_browser'))
+		except:
+			# Último recurso: lanzar sin parámetros
+			ui.launch()

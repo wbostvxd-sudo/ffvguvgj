@@ -174,10 +174,13 @@ def main():
         print("\n✓ Iniciando interfaz...")
         print("=" * 60)
         
-        # Lanzar la interfaz
+        # Lanzar la interfaz usando el sistema de UI de FaceFusion
         import faceswap_colab.uis.core as ui
         ui.init()
-        ui.launch(share=True, server_name='0.0.0.0', server_port=7860)
+        
+        # El método launch() de uis/core.py crea la UI y llama a run() en cada layout
+        # El método run() en los layouts maneja el lanzamiento real con Gradio
+        ui.launch()
         
     except Exception as e:
         print(f"Error al iniciar: {e}")
