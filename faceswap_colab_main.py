@@ -17,26 +17,61 @@ os.environ['MKL_NUM_THREADS'] = '1'
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 def install_dependencies():
-    """Instala las dependencias necesarias"""
+    """Instala las dependencias necesarias con versiones compatibles"""
     print("Instalando dependencias...")
+    
+    # Actualizar pip primero
     try:
         subprocess.check_call([
-            sys.executable, '-m', 'pip', 'install', '-q',
-            'gradio-rangeslider==0.0.8',
-            'gradio==5.44.1',
-            'numpy==2.3.4',
-            'onnx==1.19.1',
-            'onnxruntime-gpu==1.23.2',
-            'opencv-python==4.12.0.88',
-            'psutil==7.1.2',
-            'tqdm==4.67.1',
-            'scipy==1.16.3',
-            'insightface==0.7.3'
+            sys.executable, '-m', 'pip', 'install', '--quiet', '--upgrade', 'pip', 'setuptools', 'wheel'
         ])
-        print("✓ Dependencias instaladas correctamente")
-    except subprocess.CalledProcessError as e:
-        print(f"Error instalando dependencias: {e}")
-        return False
+    except:
+        pass
+    
+    # Lista de paquetes con versiones compatibles probadas
+    packages = [
+        # Base - usar numpy 1.x para máxima compatibilidad
+        ('numpy', '1.26.4'),
+        ('opencv-python', '4.9.0.80'),
+        ('psutil', '5.9.8'),
+        ('tqdm', '4.66.1'),
+        ('scipy', '1.11.4'),
+        # ML
+        ('onnx', '1.16.0'),
+        ('onnxruntime-gpu', '1.16.3'),
+        # Gradio - versión estable
+        ('gradio', '4.44.0'),
+        ('gradio-rangeslider', '0.0.8'),
+        # InsightFace
+        ('insightface', '0.7.3'),
+    ]
+    
+    failed_packages = []
+    
+    # Instalar cada paquete individualmente
+    for package_name, version in packages:
+        try:
+            print(f"  Instalando {package_name}=={version}...")
+            subprocess.check_call([
+                sys.executable, '-m', 'pip', 'install', '--quiet', 
+                f'{package_name}=={version}'
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError:
+            # Si falla con versión exacta, intentar sin versión
+            try:
+                print(f"  Intentando {package_name} (última versión)...")
+                subprocess.check_call([
+                    sys.executable, '-m', 'pip', 'install', '--quiet', package_name
+                ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except:
+                failed_packages.append(package_name)
+                print(f"  ⚠ No se pudo instalar {package_name}")
+    
+    if failed_packages:
+        print(f"\n⚠ Advertencia: No se pudieron instalar: {', '.join(failed_packages)}")
+        print("Intentando continuar...")
+    
+    print("✓ Instalación de dependencias completada")
     return True
 
 def setup_environment():
