@@ -98,15 +98,25 @@ def init_default_state():
         if state_manager.get_item(key) is None:
             state_manager.init_item(key, value)
     
-    # Detectar y configurar GPU si está disponible
+    # Detectar y configurar GPU/CUDA automáticamente
     try:
-        import torch
-        if torch.cuda.is_available():
+        from onnxruntime import get_available_providers
+        available_providers = get_available_providers()
+        
+        # Verificar si CUDA está disponible en onnxruntime
+        if 'CUDAExecutionProvider' in available_providers:
             # GPU disponible - usar CUDA
-            if state_manager.get_item('execution_providers') == ['cpu']:
-                state_manager.set_item('execution_providers', ['cuda'])
-                print("  ✓ GPU detectada - usando CUDA")
-    except:
-        # Si no hay torch o no hay GPU, usar CPU (ya está configurado)
-        pass
+            state_manager.set_item('execution_providers', ['cuda'])
+            print("  ✓ GPU detectada - usando CUDA (onnxruntime)")
+        elif 'TensorrtExecutionProvider' in available_providers:
+            # TensorRT disponible
+            state_manager.set_item('execution_providers', ['tensorrt'])
+            print("  ✓ GPU detectada - usando TensorRT")
+        else:
+            # Solo CPU disponible
+            print("  ℹ GPU no detectada - usando CPU")
+    except Exception as e:
+        # Si falla la detección, usar CPU (ya está configurado)
+        print(f"  ⚠ Error detectando GPU: {e}")
+        print("  ℹ Usando CPU por defecto")
 
