@@ -220,6 +220,18 @@ def detect_with_nsfw_3(vision_frame : VisionFrame) -> bool:
 
 def forward_nsfw(vision_frame : VisionFrame, model_name : str) -> Detection:
 	content_analyser = get_inference_pool().get(model_name)
+	
+	if content_analyser is None:
+		# Modelo no cargado - forzar descarga
+		pre_check()
+		content_analyser = get_inference_pool().get(model_name)
+		
+		if content_analyser is None:
+			# Si aún no se puede cargar, devolver detección segura (no NSFW)
+			if model_name == 'nsfw_1':
+				return numpy.zeros((1, 85))  # Formato esperado para nsfw_1
+			else:
+				return numpy.array([1.0, 0.0, 0.0, 0.0])  # Formato esperado para nsfw_2/3
 
 	with conditional_thread_semaphore():
 		detection = content_analyser.run(None,

@@ -396,6 +396,14 @@ def detect_with_yunet(vision_frame : VisionFrame, face_detector_size : str) -> T
 
 def forward_with_retinaface(detect_vision_frame : VisionFrame) -> Detection:
 	face_detector = get_inference_pool().get('retinaface')
+	
+	if face_detector is None:
+		# Modelo no cargado - forzar descarga
+		pre_check()
+		face_detector = get_inference_pool().get('retinaface')
+		
+		if face_detector is None:
+			return []
 
 	with thread_semaphore():
 		detection = face_detector.run(None,
@@ -408,6 +416,14 @@ def forward_with_retinaface(detect_vision_frame : VisionFrame) -> Detection:
 
 def forward_with_scrfd(detect_vision_frame : VisionFrame) -> Detection:
 	face_detector = get_inference_pool().get('scrfd')
+	
+	if face_detector is None:
+		# Modelo no cargado - forzar descarga
+		pre_check()
+		face_detector = get_inference_pool().get('scrfd')
+		
+		if face_detector is None:
+			return []
 
 	with thread_semaphore():
 		detection = face_detector.run(None,
@@ -420,6 +436,14 @@ def forward_with_scrfd(detect_vision_frame : VisionFrame) -> Detection:
 
 def forward_with_yolo_face(detect_vision_frame : VisionFrame) -> Detection:
 	face_detector = get_inference_pool().get('yolo_face')
+	
+	if face_detector is None:
+		# Modelo no cargado - forzar descarga
+		pre_check()
+		face_detector = get_inference_pool().get('yolo_face')
+		
+		if face_detector is None:
+			return []
 
 	with thread_semaphore():
 		detection = face_detector.run(None,
@@ -432,6 +456,14 @@ def forward_with_yolo_face(detect_vision_frame : VisionFrame) -> Detection:
 
 def forward_with_yunet(detect_vision_frame : VisionFrame) -> Detection:
 	face_detector = get_inference_pool().get('yunet')
+	
+	if face_detector is None:
+		# Modelo no cargado - forzar descarga
+		pre_check()
+		face_detector = get_inference_pool().get('yunet')
+		
+		if face_detector is None:
+			return []
 
 	with thread_semaphore():
 		detection = face_detector.run(None,
