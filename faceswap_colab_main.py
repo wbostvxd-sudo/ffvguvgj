@@ -170,6 +170,7 @@ def main():
         state_manager.init_item('open_browser', False)
         state_manager.init_item('temp_path', tempfile.gettempdir())
         state_manager.init_item('log_level', 'info')
+        state_manager.init_item('processors', [])  # Inicializar processors como lista vacía
         
         print("\n✓ Iniciando interfaz...")
         print("=" * 60)
