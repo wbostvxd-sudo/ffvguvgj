@@ -10,7 +10,7 @@ def init_default_state():
     
     # Valores básicos
     defaults = {
-        'processors': [],
+        'processors': ['face_swapper'],  # Procesador principal para intercambio de rostros
         'source_paths': [],
         'target_path': '',
         'output_path': '',
