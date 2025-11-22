@@ -31,26 +31,36 @@ def install_dependencies():
     # CRÍTICO: Forzar numpy 1.x primero (Colab puede tener numpy 2.x preinstalado)
     print("  Forzando numpy 1.x (compatible)...")
     try:
-        # Desinstalar cualquier numpy 2.x
+        # Desinstalar cualquier numpy 2.x y paquetes dependientes
         subprocess.check_call([
-            sys.executable, '-m', 'pip', 'uninstall', '-y', 'numpy'
+            sys.executable, '-m', 'pip', 'uninstall', '-y', 'numpy', 'pandas', 'scipy'
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except:
         pass
     
-    # Instalar numpy 1.x explícitamente
+    # Instalar numpy 1.x explícitamente (versión que tiene broadcast_to)
     try:
         subprocess.check_call([
-            sys.executable, '-m', 'pip', 'install', '--quiet', '--no-deps', 'numpy==1.26.4'
+            sys.executable, '-m', 'pip', 'install', '--quiet', '--no-cache-dir', 'numpy==1.26.4'
         ])
         print("  ✓ numpy 1.26.4 instalado")
     except:
         try:
             subprocess.check_call([
-                sys.executable, '-m', 'pip', 'install', '--quiet', 'numpy==1.26.4'
+                sys.executable, '-m', 'pip', 'install', '--quiet', '--no-cache-dir', 'numpy==1.26.4'
             ])
         except:
             print("  ⚠ Error instalando numpy, intentando continuar...")
+    
+    # Reinstalar pandas y scipy DESPUÉS de numpy (para compatibilidad)
+    print("  Reinstalando pandas y scipy (compatible con numpy 1.x)...")
+    try:
+        subprocess.check_call([
+            sys.executable, '-m', 'pip', 'install', '--quiet', '--no-cache-dir', 
+            'pandas>=2.0.0', 'scipy==1.11.4'
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except:
+        pass
     
     # Desinstalar opencv-python si existe (necesita recompilarse con numpy 1.x)
     print("  Reinstalando opencv-python (compatible con numpy 1.x)...")
@@ -71,7 +81,7 @@ def install_dependencies():
         # ML
         ('onnx', '1.16.0'),
         ('onnxruntime-gpu', '1.16.3'),
-        # Gradio - versión estable
+        # Gradio - versión estable (reinstalar después de numpy/pandas)
         ('gradio', '4.44.0'),
         ('gradio-rangeslider', '0.0.8'),
         # InsightFace
@@ -99,18 +109,31 @@ def install_dependencies():
                 failed_packages.append(package_name)
                 print(f"  ⚠ No se pudo instalar {package_name}")
     
-    # Verificar numpy al final
+    # Verificar numpy y reinstalar dependencias si es necesario
     try:
         import numpy
         if numpy.__version__.startswith('2.'):
             print("  ⚠ ADVERTENCIA: numpy 2.x detectado, forzando downgrade...")
             subprocess.check_call([
-                sys.executable, '-m', 'pip', 'install', '--force-reinstall', '--no-deps', 'numpy==1.26.4'
+                sys.executable, '-m', 'pip', 'install', '--force-reinstall', '--no-deps', 
+                '--no-cache-dir', 'numpy==1.26.4'
             ])
             # Reinstalar dependencias que necesitan numpy
+            print("  Reinstalando dependencias compatibles...")
             subprocess.check_call([
-                sys.executable, '-m', 'pip', 'install', '--force-reinstall', '--no-deps', 'opencv-python==4.9.0.80'
-            ])
+                sys.executable, '-m', 'pip', 'install', '--force-reinstall', '--no-cache-dir',
+                'pandas', 'scipy==1.11.4', 'opencv-python==4.9.0.80'
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception as e:
+        print(f"  ⚠ Error en verificación: {e}")
+    
+    # Reinstalar gradio después de asegurar numpy/pandas correctos
+    print("  Reinstalando Gradio (compatible)...")
+    try:
+        subprocess.check_call([
+            sys.executable, '-m', 'pip', 'install', '--force-reinstall', '--no-cache-dir',
+            'gradio==4.44.0', 'gradio-rangeslider==0.0.8'
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except:
         pass
     
@@ -133,27 +156,56 @@ def setup_environment():
     os.environ['GRADIO_TEMP_DIR'] = os.path.join(temp_dir, 'faceswap_colab', 'gradio')
 
 def verify_numpy():
-    """Verifica que numpy 1.x esté instalado correctamente"""
+    """Verifica que numpy 1.x esté instalado correctamente y que broadcast_to funcione"""
     try:
         import numpy
+        from numpy.lib.stride_tricks import broadcast_to
         version = numpy.__version__
         if version.startswith('2.'):
             print(f"⚠ ADVERTENCIA: NumPy {version} detectado (incompatible)")
             print("  Forzando downgrade a NumPy 1.26.4...")
             subprocess.check_call([
                 sys.executable, '-m', 'pip', 'install', '--force-reinstall', 
-                '--no-deps', 'numpy==1.26.4'
+                '--no-deps', '--no-cache-dir', 'numpy==1.26.4'
             ])
+            # Reinstalar pandas y gradio
+            subprocess.check_call([
+                sys.executable, '-m', 'pip', 'install', '--force-reinstall', '--no-cache-dir',
+                'pandas', 'gradio==4.44.0'
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             # Recargar numpy
             import importlib
             import numpy
             importlib.reload(numpy)
             print(f"  ✓ NumPy {numpy.__version__} ahora activo")
         else:
-            print(f"  ✓ NumPy {version} (compatible)")
+            # Verificar que broadcast_to funciona
+            try:
+                from numpy.lib.stride_tricks import broadcast_to
+                test_array = numpy.array([1, 2, 3])
+                broadcast_to(test_array, (2, 3))
+                print(f"  ✓ NumPy {version} (compatible, broadcast_to funciona)")
+            except ImportError:
+                print(f"  ⚠ NumPy {version} no tiene broadcast_to, reinstalando...")
+                subprocess.check_call([
+                    sys.executable, '-m', 'pip', 'install', '--force-reinstall', 
+                    '--no-cache-dir', 'numpy==1.26.4'
+                ])
+                subprocess.check_call([
+                    sys.executable, '-m', 'pip', 'install', '--force-reinstall', '--no-cache-dir',
+                    'pandas', 'gradio==4.44.0'
+                ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return True
     except Exception as e:
         print(f"  ⚠ Error verificando NumPy: {e}")
+        print("  Intentando reinstalar numpy y dependencias...")
+        try:
+            subprocess.check_call([
+                sys.executable, '-m', 'pip', 'install', '--force-reinstall', '--no-cache-dir',
+                'numpy==1.26.4', 'pandas', 'gradio==4.44.0'
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except:
+            pass
         return False
 
 def main():
