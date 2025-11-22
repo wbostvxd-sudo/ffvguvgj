@@ -87,6 +87,11 @@ def init_default_state():
         'background_remover_model': 'ben_2',
         'background_remover_color': (0, 0, 0, 0),  # RGBA - transparente por defecto
         
+        # Face swapper defaults
+        'face_swapper_model': 'inswapper_128',  # Modelo por defecto para intercambio de rostros
+        'face_swapper_pixel_boost': '128x128',  # Resolución de procesamiento
+        'face_swapper_weight': 0.5,  # Balance entre rostro fuente y objetivo
+        
         # Job defaults
         'job_id': '',
         'job_status': 'drafted',
