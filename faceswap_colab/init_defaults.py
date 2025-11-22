@@ -68,7 +68,7 @@ def init_default_state():
         
         # Execution defaults
         'execution_providers': ['cpu'],
-        'execution_device_ids': [],
+        'execution_device_ids': [0],  # Usar device 0 por defecto (GPU en Colab, CPU si no hay GPU)
         'execution_thread_count': 4,
         'video_memory_strategy': 'moderate',
         'system_memory_limit': 0,
@@ -97,4 +97,16 @@ def init_default_state():
     for key, value in defaults.items():
         if state_manager.get_item(key) is None:
             state_manager.init_item(key, value)
+    
+    # Detectar y configurar GPU si está disponible
+    try:
+        import torch
+        if torch.cuda.is_available():
+            # GPU disponible - usar CUDA
+            if state_manager.get_item('execution_providers') == ['cpu']:
+                state_manager.set_item('execution_providers', ['cuda'])
+                print("  ✓ GPU detectada - usando CUDA")
+    except:
+        # Si no hay torch o no hay GPU, usar CPU (ya está configurado)
+        pass
 
