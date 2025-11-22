@@ -38,9 +38,15 @@ def render() -> None:
 			value = state_manager.get_item('face_detector_model')
 		)
 		FACE_DETECTOR_SIZE_DROPDOWN = gradio.Dropdown(**face_detector_size_dropdown_options)
+	face_detector_margin = state_manager.get_item('face_detector_margin')
+	# Manejar None - valor por defecto: (0, 0, 0, 0)
+	if face_detector_margin is None:
+		face_detector_margin = (0, 0, 0, 0)
+		state_manager.set_item('face_detector_margin', face_detector_margin)
+	
 	FACE_DETECTOR_MARGIN_SLIDER = gradio.Slider(
 		label = translator.get('uis.face_detector_margin_slider'),
-		value = state_manager.get_item('face_detector_margin')[0],
+		value = face_detector_margin[0],
 		step = calculate_float_step(faceswap_colab.choices.face_detector_margin_range),
 		minimum = faceswap_colab.choices.face_detector_margin_range[0],
 		maximum = faceswap_colab.choices.face_detector_margin_range[-1]

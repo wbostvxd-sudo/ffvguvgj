@@ -296,7 +296,11 @@ def extract_crop_frame(vision_frame : VisionFrame, face : Face) -> Optional[Visi
 
 
 def prepare_output_frame(target_vision_frame : VisionFrame, temp_vision_frame : VisionFrame, temp_vision_mask : Mask) -> VisionFrame:
-	temp_vision_mask = temp_vision_mask.clip(state_manager.get_item('background_remover_color')[-1], 255)
+	background_remover_color = state_manager.get_item('background_remover_color')
+	# Manejar None - valor por defecto: (0, 0, 0, 0)
+	if background_remover_color is None:
+		background_remover_color = (0, 0, 0, 0)
+	temp_vision_mask = temp_vision_mask.clip(background_remover_color[-1], 255)
 	temp_vision_frame = merge_vision_mask(temp_vision_frame, temp_vision_mask)
 	temp_vision_frame = cv2.resize(temp_vision_frame, target_vision_frame.shape[1::-1])
 	return temp_vision_frame

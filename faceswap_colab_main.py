@@ -165,12 +165,20 @@ def main():
         
         # Configurar para modo UI
         from faceswap_colab import state_manager
+        from faceswap_colab.init_defaults import init_default_state
+        
+        # Inicializar valores básicos primero
         state_manager.init_item('command', 'run')
         state_manager.init_item('ui_layouts', ['default'])
         state_manager.init_item('open_browser', False)
         state_manager.init_item('temp_path', tempfile.gettempdir())
         state_manager.init_item('log_level', 'info')
-        state_manager.init_item('processors', [])  # Inicializar processors como lista vacía
+        state_manager.init_item('processors', [])
+        
+        # Inicializar todos los valores por defecto
+        print("  Inicializando valores por defecto...")
+        init_default_state()
+        print("  ✓ Valores por defecto inicializados")
         
         print("\n✓ Iniciando interfaz...")
         print("=" * 60)

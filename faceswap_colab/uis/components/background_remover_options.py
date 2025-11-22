@@ -28,6 +28,10 @@ def render() -> None:
 
 	has_background_remover = 'background_remover' in state_manager.get_item('processors')
 	background_remover_color = state_manager.get_item('background_remover_color')
+	# Manejar None - valor por defecto: (0, 0, 0, 0) - transparente
+	if background_remover_color is None:
+		background_remover_color = (0, 0, 0, 0)
+		state_manager.set_item('background_remover_color', background_remover_color)
 	BACKGROUND_REMOVER_MODEL_DROPDOWN = gradio.Dropdown(
 		label = translator.get('uis.model_dropdown', 'faceswap_colab.processors.modules.background_remover'),
 		choices = background_remover_choices.background_remover_models,

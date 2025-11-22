@@ -35,9 +35,14 @@ def render() -> None:
 	global FACE_MASK_PADDING_BOTTOM_SLIDER
 	global FACE_MASK_PADDING_LEFT_SLIDER
 
-	has_box_mask = 'box' in state_manager.get_item('face_mask_types')
-	has_region_mask = 'region' in state_manager.get_item('face_mask_types')
-	has_area_mask = 'area' in state_manager.get_item('face_mask_types')
+	face_mask_types = state_manager.get_item('face_mask_types')
+	if face_mask_types is None:
+		face_mask_types = []
+		state_manager.set_item('face_mask_types', face_mask_types)
+	
+	has_box_mask = 'box' in face_mask_types
+	has_region_mask = 'region' in face_mask_types
+	has_area_mask = 'area' in face_mask_types
 	with gradio.Row():
 		FACE_OCCLUDER_MODEL_DROPDOWN = gradio.Dropdown(
 			label = translator.get('uis.face_occluder_model_dropdown'),
@@ -74,6 +79,12 @@ def render() -> None:
 		value = state_manager.get_item('face_mask_blur'),
 		visible = has_box_mask
 	)
+	face_mask_padding = state_manager.get_item('face_mask_padding')
+	# Manejar None - valor por defecto: (0, 0, 0, 0)
+	if face_mask_padding is None:
+		face_mask_padding = (0, 0, 0, 0)
+		state_manager.set_item('face_mask_padding', face_mask_padding)
+	
 	with gradio.Group(visible = has_box_mask) as FACE_MASK_BOX_WRAPPER:
 		with gradio.Row():
 			FACE_MASK_PADDING_TOP_SLIDER = gradio.Slider(
@@ -81,14 +92,14 @@ def render() -> None:
 				step = calculate_int_step(faceswap_colab.choices.face_mask_padding_range),
 				minimum = faceswap_colab.choices.face_mask_padding_range[0],
 				maximum = faceswap_colab.choices.face_mask_padding_range[-1],
-				value = state_manager.get_item('face_mask_padding')[0]
+				value = face_mask_padding[0]
 			)
 			FACE_MASK_PADDING_RIGHT_SLIDER = gradio.Slider(
 				label = translator.get('uis.face_mask_padding_right_slider'),
 				step = calculate_int_step(faceswap_colab.choices.face_mask_padding_range),
 				minimum = faceswap_colab.choices.face_mask_padding_range[0],
 				maximum = faceswap_colab.choices.face_mask_padding_range[-1],
-				value = state_manager.get_item('face_mask_padding')[1]
+				value = face_mask_padding[1]
 			)
 		with gradio.Row():
 			FACE_MASK_PADDING_BOTTOM_SLIDER = gradio.Slider(
@@ -96,14 +107,14 @@ def render() -> None:
 				step = calculate_int_step(faceswap_colab.choices.face_mask_padding_range),
 				minimum = faceswap_colab.choices.face_mask_padding_range[0],
 				maximum = faceswap_colab.choices.face_mask_padding_range[-1],
-				value = state_manager.get_item('face_mask_padding')[2]
+				value = face_mask_padding[2]
 			)
 			FACE_MASK_PADDING_LEFT_SLIDER = gradio.Slider(
 				label = translator.get('uis.face_mask_padding_left_slider'),
 				step = calculate_int_step(faceswap_colab.choices.face_mask_padding_range),
 				minimum = faceswap_colab.choices.face_mask_padding_range[0],
 				maximum = faceswap_colab.choices.face_mask_padding_range[-1],
-				value = state_manager.get_item('face_mask_padding')[3]
+				value = face_mask_padding[3]
 			)
 	register_ui_component('face_occluder_model_dropdown', FACE_OCCLUDER_MODEL_DROPDOWN)
 	register_ui_component('face_parser_model_dropdown', FACE_PARSER_MODEL_DROPDOWN)
