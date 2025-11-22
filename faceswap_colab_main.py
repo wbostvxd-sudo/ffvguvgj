@@ -29,6 +29,14 @@ except Exception as e:
     # Si falla, continuar de todas formas
     pass
 
+# PARCHEAR numpy.ma ANTES DE QUE SE IMPORTE
+# Esto soluciona el error: AttributeError: 'numpy.ufunc' object has no attribute '__qualname__'
+try:
+    from faceswap_colab import numpy_ma_patch
+except Exception as e:
+    # Si falla, continuar de todas formas
+    pass
+
 def install_dependencies():
     """Instala las dependencias necesarias con versiones ACTUALES (numpy 2.x compatible)"""
     print("Instalando dependencias (versiones actuales)...")
