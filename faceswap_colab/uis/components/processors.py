@@ -3,7 +3,7 @@ from typing import List, Optional
 import gradio
 
 from faceswap_colab import state_manager, translator
-from faceswap_colab.filesystem import get_file_name, resolve_file_paths
+from faceswap_colab.filesystem import get_file_name, resolve_file_paths, resolve_relative_path
 from faceswap_colab.processors.core import get_processors_modules
 from faceswap_colab.uis.core import register_ui_component
 
@@ -54,7 +54,7 @@ def update_processors(processors : List[str]) -> gradio.CheckboxGroup:
 
 
 def sort_processors(processors : List[str]) -> List[str]:
-	available_processors = [ get_file_name(file_path) for file_path in resolve_file_paths('faceswap_colab/processors/modules') ]
+	available_processors = [ get_file_name(file_path) for file_path in resolve_file_paths(resolve_relative_path('processors/modules')) ]
 	current_processors = []
 	
 	# Manejar caso cuando processors es None

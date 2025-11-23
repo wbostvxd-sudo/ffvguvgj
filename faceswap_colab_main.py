@@ -176,12 +176,7 @@ def main():
         from faceswap_colab.init_defaults import init_default_state
         
         # Inicializar valores básicos primero
-        state_manager.init_item('command', 'run')
-        state_manager.init_item('ui_layouts', ['default'])
-        state_manager.init_item('open_browser', False)
-        state_manager.init_item('temp_path', tempfile.gettempdir())
-        state_manager.init_item('log_level', 'info')
-        state_manager.init_item('processors', [])
+        # state_manager.init_item calls removed to allow init_default_state to work correctly
         
         # Inicializar todos los valores por defecto
         print("  Inicializando valores por defecto...")

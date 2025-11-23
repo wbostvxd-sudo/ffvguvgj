@@ -3,6 +3,7 @@ Inicialización de valores por defecto para state_manager
 Asegura que todos los valores necesarios estén inicializados antes de usar la UI
 """
 from typing import List, Tuple
+import tempfile
 
 def init_default_state():
     """Inicializa todos los valores por defecto necesarios para la UI"""
@@ -14,7 +15,7 @@ def init_default_state():
         'source_paths': [],
         'target_path': '',
         'output_path': '',
-        'temp_path': '/tmp',
+        'temp_path': tempfile.gettempdir(),
         'jobs_path': '.jobs',
         'config_path': 'faceswap_colab.ini',
         'log_level': 'info',
